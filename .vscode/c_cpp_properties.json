@@ -1,0 +1,40 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "",
+        "limitSymbolsToIncludedHeaders": true
+      },
+      "includePath": [
+        "/home/rustam/catkin_ws/devel/include/**",
+        "/opt/ros/melodic/include/**",
+        "/home/rustam/catkin_ws/src/calibrate_rgb_sensor_rustam/include/**",
+        "/home/rustam/catkin_ws/src/moveit/moveit_planners/chomp/chomp_motion_planner/include/**",
+        "/home/rustam/catkin_ws/src/DynamixelSDK/ros/dynamixel_sdk/include/**",
+        "/home/rustam/catkin_ws/src/dynamixel-workbench/dynamixel_workbench_controllers/include/**",
+        "/home/rustam/catkin_ws/src/dynamixel-workbench/dynamixel_workbench_operators/include/**",
+        "/home/rustam/catkin_ws/src/dynamixel-workbench/dynamixel_workbench_toolbox/include/**",
+        "/home/rustam/catkin_ws/src/moveit/geometric_shapes/include/**",
+        "/home/rustam/catkin_ws/src/moveit/moveit_planners/chomp/chomp_interface/include/**",
+        "/home/rustam/catkin_ws/src/moveit_resources/include/**",
+        "/home/rustam/catkin_ws/src/moveit/moveit_ros/benchmarks/include/**",
+        "/home/rustam/catkin_ws/src/moveit/moveit_plugins/moveit_ros_control_interface/include/**",
+        "/home/rustam/catkin_ws/src/moveit/moveit_ros/move_group/include/**",
+        "/home/rustam/catkin_ws/src/moveit/moveit_ros/occupancy_map_monitor/include/**",
+        "/home/rustam/catkin_ws/src/moveit/moveit_ros/robot_interaction/include/**",
+        "/home/rustam/catkin_ws/src/moveit/moveit_ros/moveit_servo/include/**",
+        "/home/rustam/catkin_ws/src/moveit/moveit_setup_assistant/include/**",
+        "/home/rustam/catkin_ws/src/moveit/moveit_plugins/moveit_simple_controller_manager/include/**",
+        "/home/rustam/catkin_ws/src/moveit/moveit_planners/pilz_industrial_motion_planner/include/**",
+        "/home/rustam/catkin_ws/src/moveit/moveit_planners/pilz_industrial_motion_planner_testutils/include/**",
+        "/home/rustam/catkin_ws/src/common_msgs/sensor_msgs/include/**",
+        "/home/rustam/catkin_ws/src/universal_robot/ur_kinematics/include/**",
+        "/home/rustam/catkin_ws/src/ur_modern_driver/include/**",
+        "/home/rustam/catkin_ws/src/wittenstein/include/**",
+        "/usr/include/**"
+      ],
+      "name": "ROS"
+    }
+  ],
+  "version": 4
+}
