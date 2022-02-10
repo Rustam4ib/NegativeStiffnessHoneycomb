@@ -37,7 +37,7 @@ double Z_TARGET; // Target position for Z-coordinate of end-effector
 //double blackprintedpart_height = 0.032; // black 3d-printed part on end-effector (2.7cm)
 //double thorlab_table_height = 0.06; // ur5 is on thorlab (height = 6cm)
 double oldef_to_newef = 0.225; // from original end-effector to new end-effector (22.5cm)
-double weiss_height = 0.08; // height of weiss sensor (8cm)
+double weiss_height = 0.07; // height of weiss sensor (7cm)
 double honeycomb_buckling_height = 0.02; // height of buckling (2cm)
 
 
@@ -194,7 +194,7 @@ int main(int argc, char** argv)
 
 	ros::Time::init();
 
-  bag.open("/home/rustam/catkin_ws/src/calibrate_rgb_sensor_rustam/src/rosbag_data/newpc_myrosbag_ur5_and_weiss_file_4try.bag", rosbag::bagmode::Write);
+  bag.open("/home/rustam/catkin_ws/src/calibrate_rgb_sensor_rustam/src/rosbag_data/newpc_myrosbag_ur5_and_weiss_file_15try.bag", rosbag::bagmode::Write);
 
 
 
@@ -263,7 +263,7 @@ int main(int argc, char** argv)
 		PoseShow_test.pose_now();
 		Experiment.send_velocity(in_velocitydown_slow);
 		ROS_INFO("I am writing message: Z(%f) vs Z_target(%f) and fz(%f)", global_msg.z, Z_TARGET, global_msg.fz);
-		bag.write("newpc_fignya_ur5_and_weiss_4", ros::Time::now(), global_msg);
+		bag.write("newpc_myrosbag_ur5_and_weiss_file_15try", ros::Time::now(), global_msg);
 		}else{
 			PoseShow_test.pose_now();
 			Experiment.send_velocity(in_velocitydown_fast);
