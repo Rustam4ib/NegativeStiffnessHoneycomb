@@ -15,8 +15,10 @@
 #include "ur5_nsh_experiment.h"
 #include "my_msgs/my_message.h"
 #include <rosbag/bag.h>
+#include <rosserial_arduino/hallsensor.h>
 
 my_msgs::my_message global_msg;
+//rosserial_arduino::hallsensor global_msg_hallsensor;
 rosbag::Bag bag;
 
 
@@ -182,8 +184,12 @@ void force_z_Callback(const geometry_msgs::WrenchStamped::ConstPtr& msg) // call
 
 }
 
-int mode = 1;
-int count = 0;
+void hallsensor_callback(const rosserial_arduino::hallsensor::ConstPtr& msg){
+    global_msg.top  = msg->top;
+    global_msg.bot = msg->bot;
+    ROS_INFO_STREAM(global_msg);
+}
+
 
 // MAIN PROGRAM STARTS:
 int main(int argc, char** argv)
@@ -194,7 +200,7 @@ int main(int argc, char** argv)
 
 	ros::Time::init();
 
-  bag.open("/home/rustam/catkin_ws/src/calibrate_rgb_sensor_rustam/src/rosbag_data/newpc_myrosbag_ur5_and_weiss_file_15try.bag", rosbag::bagmode::Write);
+  bag.open("/home/rustam/catkin_ws/src/calibrate_rgb_sensor_rustam/src/rosbag_data_with_hall_sensor/file3.bag", rosbag::bagmode::Write);
 
 
 
@@ -233,6 +239,7 @@ int main(int argc, char** argv)
 	ros::init(argc, argv, "init_before_any_exploration_node");
   ros::NodeHandle nh; //NodeHandle is the main access point to communications with the ROS system
   ros::Subscriber sub_force_z = nh.subscribe("/weiss_wrench", 100, force_z_Callback);
+  ros::Subscriber sub_hallsensor = nh.subscribe("hallsensor_topic", 100, &hallsensor_callback);
 
 	ros::Rate loop_rate(140); // previously 125
 	ROS_INFO("pub_poses_exper");
@@ -263,7 +270,10 @@ int main(int argc, char** argv)
 		PoseShow_test.pose_now();
 		Experiment.send_velocity(in_velocitydown_slow);
 		ROS_INFO("I am writing message: Z(%f) vs Z_target(%f) and fz(%f)", global_msg.z, Z_TARGET, global_msg.fz);
-		bag.write("newpc_myrosbag_ur5_and_weiss_file_15try", ros::Time::now(), global_msg);
+		ROS_INFO("I am writing message: top(%f) vs bot(%f)", global_msg.top, global_msg.bot);
+
+		bag.write("file3", ros::Time::now(), global_msg);
+
 		}else{
 			PoseShow_test.pose_now();
 			Experiment.send_velocity(in_velocitydown_fast);
