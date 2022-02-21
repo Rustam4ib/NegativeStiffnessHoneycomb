@@ -39,11 +39,14 @@ double honeycomb_buckling_height = 0.02; // height of buckling (2cm)
 
 double F_des;
 double F_real;
-double Kp,Kd;
+double Kp,Kd,Ki;
 double Vel_old;
 double Vel_old_old;
 double Vel_new;
 double dumper;
+double integral;
+double force_error_old;
+double force_error_new;
 
 
 
@@ -241,6 +244,7 @@ int main(int argc, char** argv)
 	//F_des = 3.00;
 	Kp = 0.002;
 	Kd = 0.97; // 0.972
+	Ki = 0.0013;
 	
 	ros::Rate loop_rate(140); // previously 125
 	ROS_INFO("pub_poses_exper");
@@ -266,13 +270,18 @@ int main(int argc, char** argv)
 		int f = 200;
 		for (int n = 0; n < 400; n++){
 			F_des = 6 - 6*((n/f)%2); // change value from 0 to 6 with square wave
+
+
+			force_error_new = F_des-(-global_msg.fz);
+
+			integral = Ki*(force_error_new - force_error_old);
+
+			ROS_INFO("integral: %f", integral);
 			ROS_INFO("Kp: %f, F_real:%f, F_des:%f", Kp, global_msg.fz, F_des);
-			ROS_INFO("Kd: %f, Vel_new:%f, Vel_old:%f, vlz:%f", Kd, Vel_new, Vel_old, velocity.linear.z);
-			dumper = Kd*(-Vel_new + Vel_old);
-			ROS_INFO("dumper: %f", dumper);
-			velocity.linear.z = -Kp*(F_des-(-global_msg.fz)) + Kd*(-Vel_new + Vel_old);
-			Vel_new = Vel_old;
-			Vel_old = velocity.linear.z;
+			ROS_INFO("Ki: %f, f_e_new:%f, f_e_old:%f, vlz:%f", Ki, force_error_new, force_error_old, velocity.linear.z);
+			velocity.linear.z = -Kp*(F_des-(-global_msg.fz)) + integral;
+			force_error_old = F_des-(-global_msg.fz);
+			
 			Experiment.send_velocity(velocity);
 			ros::spinOnce();
 			loop_rate.sleep();
