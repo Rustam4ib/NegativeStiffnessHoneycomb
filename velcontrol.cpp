@@ -240,6 +240,8 @@ int main(int argc, char** argv)
   	ros::NodeHandle nh; //NodeHandle is the main access point to communications with the ROS system
   	ros::Subscriber sub_force_z = nh.subscribe("/weiss_wrench", 100, force_z_Callback);
   	ros::Subscriber sub_hallsensor = nh.subscribe("hallsensor_topic", 100, &hallsensor_callback);
+	ros::Publisher pub_des_force = nh.advertise<geometry_msgs::Point>("/force_des", 1000);
+  
 
 	//F_des = 3.00;
 	Kp = 0.002;
@@ -264,13 +266,16 @@ int main(int argc, char** argv)
 		ROS_INFO("Z_NOW before experiment: %f", Z_NOW); //send the values of Z-coordinate of end-effector relative to base frame
  	}
 
+
 	while(ros::ok() && Z_NOW > Z_TARGET+0.03)
 	{	
 		// 50% duty cycle
 		int f = 200;
 		for (int n = 0; n < 400; n++){
 			F_des = 6 - 6*((n/f)%2); // change value from 0 to 6 with square wave
-
+			geometry_msgs::Point point;
+			point.z = -F_des;
+			pub_des_force.publish(point);
 
 			force_error_new = F_des-(-global_msg.fz);
 
