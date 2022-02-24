@@ -37,7 +37,7 @@ double oldef_to_newef = 0.225; // from original end-effector to new end-effector
 double weiss_height = 0.07; // height of weiss sensor (7cm)
 double honeycomb_buckling_height = 0.02; // height of buckling (2cm)
 
-double F_des;
+double F_des, hall_des;
 double F_real;
 double Kp,Kd,Ki;
 double Vel_old;
@@ -241,10 +241,11 @@ int main(int argc, char** argv)
   	ros::Subscriber sub_force_z = nh.subscribe("/weiss_wrench", 100, force_z_Callback);
   	ros::Subscriber sub_hallsensor = nh.subscribe("hallsensor_topic", 100, &hallsensor_callback);
 	ros::Publisher pub_des_force = nh.advertise<geometry_msgs::Point>("/force_des", 1000);
-  
+  	ros::Publisher pub_des_hall = nh.advertise<geometry_msgs::Point>("/hall_des", 1000);
+
 
 	//F_des = 3.00;
-	Kp = 0.0025;
+	Kp = 0.004;
 	Kd = 0.97; // 0.972
 	Ki = 0.0013;
 	
@@ -272,21 +273,29 @@ int main(int argc, char** argv)
 		// 50% duty cycle: f = 200, n = 400
 		int f = 500;
 		for (int n = 0; n < 1000; n++){
-			F_des = 6 - 6*((n/f)%2); // change value from 0 to 6 with square wave
+			// F_des = 6 - 6*((n/f)%2); // change value from 0 to 6 with square wave
+			// geometry_msgs::Point point;
+			// point.z = -F_des;
+			// pub_des_force.publish(point);
+
+			// force_error_new = F_des-(-global_msg.fz);
+
+			// integral = Ki*(force_error_new - force_error_old);
+
+			// ROS_INFO("integral: %f", integral);
+			// ROS_INFO("Kp: %f, F_real:%f, F_des:%f", Kp, global_msg.fz, F_des);
+			// ROS_INFO("Ki: %f, f_e_new:%f, f_e_old:%f, vlz:%f", Ki, force_error_new, force_error_old, velocity.linear.z);
+			// velocity.linear.z = -Kp*(F_des-(-global_msg.fz)) + integral;
+			// force_error_old = F_des-(-global_msg.fz);
+
+			hall_des = 6.3 - 0.8*((n/f)%2); // change value from 6 to 5.5mm with square wave
 			geometry_msgs::Point point;
-			point.z = -F_des;
-			pub_des_force.publish(point);
+			point.z = hall_des;
+			pub_des_hall.publish(point);
+			ROS_INFO("Kp: %f, hall_real:%f, hall_des:%f", Kp, global_msg.bot, hall_des);
+			ROS_INFO("Velocity: %f", velocity.linear.z);
+			velocity.linear.z = -Kp*(-hall_des+global_msg.bot);
 
-			force_error_new = F_des-(-global_msg.fz);
-
-			integral = Ki*(force_error_new - force_error_old);
-
-			ROS_INFO("integral: %f", integral);
-			ROS_INFO("Kp: %f, F_real:%f, F_des:%f", Kp, global_msg.fz, F_des);
-			ROS_INFO("Ki: %f, f_e_new:%f, f_e_old:%f, vlz:%f", Ki, force_error_new, force_error_old, velocity.linear.z);
-			velocity.linear.z = -Kp*(F_des-(-global_msg.fz)) + integral;
-			force_error_old = F_des-(-global_msg.fz);
-			
 			Experiment.send_velocity(velocity);
 			ros::spinOnce();
 			loop_rate.sleep();
