@@ -244,7 +244,7 @@ int main(int argc, char** argv)
   
 
 	//F_des = 3.00;
-	Kp = 0.002;
+	Kp = 0.0025;
 	Kd = 0.97; // 0.972
 	Ki = 0.0013;
 	
@@ -269,9 +269,9 @@ int main(int argc, char** argv)
 
 	while(ros::ok() && Z_NOW > Z_TARGET+0.03)
 	{	
-		// 50% duty cycle
-		int f = 200;
-		for (int n = 0; n < 400; n++){
+		// 50% duty cycle: f = 200, n = 400
+		int f = 500;
+		for (int n = 0; n < 1000; n++){
 			F_des = 6 - 6*((n/f)%2); // change value from 0 to 6 with square wave
 			geometry_msgs::Point point;
 			point.z = -F_des;
