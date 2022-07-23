@@ -97,7 +97,7 @@ https://stackoverflow.com/questions/25393281/linux-bash-commands-to-remove-dupli
 
 #
 # Github process
-### token: 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
+### token: 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
 ``` 
 git init
 
