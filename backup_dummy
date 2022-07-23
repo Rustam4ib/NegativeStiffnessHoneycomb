@@ -1,0 +1,991 @@
+#FORCE_DISTANCE_AVERAGE
+
+from click import style
+from matplotlib.ft2font import BOLD
+from mpl_toolkits import mplot3d
+from mpl_toolkits.mplot3d import Axes3D
+import matplotlib.pyplot as plt
+from matplotlib.font_manager import FontProperties
+from matplotlib.gridspec import GridSpec
+from random import sample
+from numpy import linspace, size
+import pandas as pd
+import time
+import numpy as np
+import glob
+import os
+
+nrows = 2413
+
+up_time = 9.7
+
+#set the x and y axes for graphs
+time1 = np.linspace(0, up_time, nrows) #linspace(from (sec), to (sec), samples)
+
+#create dataframes all csv files
+df1 = pd.read_csv("/home/rustam/catkin_ws/src/calibrate_rgb_sensor_rustam/src/new setup/Force vs Distance/trials/all_csv_processed/trial1.csv",skiprows=[i for i in range(1, 80)], nrows=nrows,index_col=None, header=0)
+df2 = pd.read_csv("/home/rustam/catkin_ws/src/calibrate_rgb_sensor_rustam/src/new setup/Force vs Distance/trials/all_csv_processed/trial2.csv",skiprows=[i for i in range(1, 80)], nrows=nrows,index_col=None, header=0)
+df3 = pd.read_csv("/home/rustam/catkin_ws/src/calibrate_rgb_sensor_rustam/src/new setup/Force vs Distance/trials/all_csv_processed/trial3.csv", nrows=nrows,index_col=None, header=0)
+df4 = pd.read_csv("/home/rustam/catkin_ws/src/calibrate_rgb_sensor_rustam/src/new setup/Force vs Distance/trials/all_csv_processed/trial4.csv", nrows=nrows,index_col=None, header=0)
+df5 = pd.read_csv("/home/rustam/catkin_ws/src/calibrate_rgb_sensor_rustam/src/new setup/Force vs Distance/trials/all_csv_processed/trial5.csv", nrows=nrows,index_col=None, header=0)
+df6 = pd.read_csv("/home/rustam/catkin_ws/src/calibrate_rgb_sensor_rustam/src/new setup/Force vs Distance/trials/all_csv_processed/trial6.csv", nrows=nrows,index_col=None, header=0)
+df7 = pd.read_csv("/home/rustam/catkin_ws/src/calibrate_rgb_sensor_rustam/src/new setup/Force vs Distance/trials/all_csv_processed/trial7.csv", nrows=nrows,index_col=None, header=0)
+df8 = pd.read_csv("/home/rustam/catkin_ws/src/calibrate_rgb_sensor_rustam/src/new setup/Force vs Distance/trials/all_csv_processed/trial8.csv", nrows=nrows,index_col=None, header=0)
+df9 = pd.read_csv("/home/rustam/catkin_ws/src/calibrate_rgb_sensor_rustam/src/new setup/Force vs Distance/trials/all_csv_processed/trial9.csv", nrows=nrows,index_col=None, header=0)
+df10 = pd.read_csv("/home/rustam/catkin_ws/src/calibrate_rgb_sensor_rustam/src/new setup/Force vs Distance/trials/all_csv_processed/trial10.csv", nrows=nrows,index_col=None, header=0)
+
+
+
+def mean_UR5():
+    li_UR5 = []
+    li_UR5.append(df1["z"])
+    li_UR5.append(df2["z"])
+    li_UR5.append(df3["z"])
+    li_UR5.append(df4["z"])
+    li_UR5.append(df5["z"])
+    li_UR5.append(df6["z"])
+    li_UR5.append(df7["z"])
+    li_UR5.append(df8["z"])
+    li_UR5.append(df9["z"])
+    li_UR5.append(df10["z"])
+
+    #concatinate all "hall" columns into one dataframe "frame"
+    merged_UR5 = pd.concat(li_UR5, axis=1, ignore_index=True)
+
+    #put the dataframe "frame" into merged/merged.csv
+    merged_UR5.to_csv("/home/rustam/catkin_ws/src/calibrate_rgb_sensor_rustam/src/new setup/Force vs Distance/trials/all_csv_processed/merged_UR5.csv", index=False, header=1)
+
+    #create dataframe "merged_df"
+    merged_df_UR5 = pd.read_csv("/home/rustam/catkin_ws/src/calibrate_rgb_sensor_rustam/src/new setup/Force vs Distance/trials/all_csv_processed/merged_UR5.csv",index_col=1)
+
+    #find mean column of all fz columns
+    merged_df_UR5['mean'] = merged_df_UR5.iloc[0:2413, 0:9].median(axis=1, skipna=False, numeric_only=None)
+    #print(merged_df_hall['mean'])
+
+    #create csv file "mean_column.csv" with only mean column
+    merged_df_UR5['mean'].to_csv("/home/rustam/catkin_ws/src/calibrate_rgb_sensor_rustam/src/new setup/Force vs Distance/trials/all_csv_processed/mean_column_UR5.csv",header=['mean'],index=False)
+
+    merged_df_UR5['mean'] = merged_df_UR5['mean'] * 1000
+    merged_df_UR5['mean'] = merged_df_UR5['mean'] - merged_df_UR5['mean'].iat[1]
+    merged_df_UR5['mean'] = -merged_df_UR5['mean']
+    print(merged_df_UR5)
+    fig = plt.figure()
+    ax = fig.add_subplot(1, 1, 1)
+    #legend.legendHandles[0]._legmarker.set_markersize(50)
+    
+    plt.plot(time1, merged_df_UR5['mean'], label = "UR5 Displacement vs time")
+
+    major_ticks_x = np.arange(0, 10.0, 0.5)
+    major_ticks_y = np.arange(0.0, 16.0, 0.5)
+    #minor_ticks = np.arange(0, 10.0, 0.5)
+    ax.set_xticks(major_ticks_x)
+    ax.set_yticks(major_ticks_y)
+    #ax.set_xticks(minor_ticks, minor=True)
+    ax.tick_params(axis='x', which='major', labelsize=20)
+    ax.tick_params(axis='y', which='major', labelsize=20)
+    ax.grid(which='minor', alpha=0.3, linestyle='dashed')
+    ax.grid(which='major', alpha=0.3)
+    ax.set_title("UR5 velocity: 1.5mm/sec", fontsize = 30, weight = "bold")
+    ax.set_xlabel('Time (s)', fontsize = 30, weight = "bold")
+    ax.set_ylabel('UR5 displacement (mm)', fontsize = 30, weight = "bold")
+    
+
+    sec_to_frame = 248
+    delta = sec_to_frame / 2
+    derivative = [ ((merged_df_UR5['mean'].iloc[i+delta] - merged_df_UR5['mean'].iloc[i]) / (time1[i+delta] - time1[i])) for i in range(0,len(time1)-delta,delta)]
+    plt.plot([time1[i] for i in range(0,len(time1)-delta,delta)], derivative, label = "d(UR5 Displacement)/dt vs time")
+    ax.legend(fontsize = 20)
+    plt.show()
+
+#------------------------------------------------------------------
+#---------------------------diff(hall)_VS_TIME---------------------
+#------------------------------------------------------------------
+def derivative_hall_vs_time():
+    hall_mean = pd.read_csv("/home/rustam/catkin_ws/src/calibrate_rgb_sensor_rustam/src/new setup/Force vs Distance/trials/all_csv_processed/mean_column_hall.csv",index_col=None,header=0) 
+
+    hall_mean = hall_mean['mean'] - hall_mean['mean'].iat[1]
+    hall_mean = -hall_mean
+    print(hall_mean)
+    #nforce_mean = len(force_mean)
+    #der_force_mean = force_mean.diff()
+    sec_to_frame = 248
+    delta = sec_to_frame / 2
+    derivative = [ ((hall_mean.iloc[i+delta] - hall_mean.iloc[i]) / (time1[i+delta] - time1[i])) for i in range(0,len(time1)-delta,delta)]
+    #total_derivative = der_hall_mean / der_time
+    #print(time1[0:10])
+    #print(der_time[0:10])
+    #print ([(hall_mean.iloc[i+1] - hall_mean.iloc[i]) for i in range(len(time1)-1)])
+    #print ([   ((hall_mean.iloc[i+1] - hall_mean.iloc[i]) /(time1[i+1] - time1[i])) for i in range(len(time1)-1)])
+    fig = plt.figure()
+    ax = fig.add_subplot(1, 1, 1)
+    major_ticks_x = np.arange(0.0, 10.0, 0.5)
+    major_ticks_y = np.arange(-5.0, 5.0, 0.5)
+    #minor_ticks = np.arange(0, 10.0, 0.5)
+    ax.set_xticks(major_ticks_x)
+    ax.set_yticks(major_ticks_y)
+    ax.tick_params(axis='x', which='major', labelsize=30)
+    ax.tick_params(axis='y', which='major', labelsize=30)
+    ax.grid(which='minor', alpha=0.3, linestyle='dashed')
+    ax.grid(which='major', alpha=0.3)
+    ax.set_xlabel('Time (s)', fontsize = 30, weight = "bold")
+    ax.set_ylabel('Hall Derivative (mm)', fontsize = 30, weight = "bold")    
+    plt.plot([time1[i] for i in range(0,len(time1)-delta,delta)], derivative)
+    plt.show()
+
+#------------------------------------------------------------------
+#---------------------------diff(FORCE)_VS_TIME--------------------
+#------------------------------------------------------------------
+def derivative_force_vs_time():
+    force_mean = pd.read_csv("/home/rustam/catkin_ws/src/calibrate_rgb_sensor_rustam/src/new setup/Force vs Distance/trials/all_csv_processed/mean_column_force.csv",index_col=None,header=0) 
+    #nforce_mean = len(force_mean)
+    #der_force_mean = force_mean.diff()
+    sec_to_frame = 248
+    delta = sec_to_frame / 2
+    derivative = [ ((force_mean.iloc[i+delta] - force_mean.iloc[i]) / (time1[i+delta] - time1[i])) for i in range(0,len(time1)-delta,delta)]
+    #total_derivative = der_force_mean / der_time
+    #print(time1[0:10])
+    #print(der_time[0:10])
+    #print ([(force_mean.iloc[i+1] - force_mean.iloc[i]) for i in range(len(time1)-1)])
+    #print ([   ((force_mean.iloc[i+1] - force_mean.iloc[i]) /(time1[i+1] - time1[i])) for i in range(len(time1)-1)])
+    fig = plt.figure()
+    ax = fig.add_subplot(1, 1, 1)
+    major_ticks_x = np.arange(0.0, 10.0, 0.5)
+    major_ticks_y = np.arange(-35.0, 35.0, 5.0)
+    #minor_ticks = np.arange(0, 10.0, 0.5)
+    ax.set_xticks(major_ticks_x)
+    ax.set_yticks(major_ticks_y)
+    ax.tick_params(axis='x', which='major', labelsize=30)
+    ax.tick_params(axis='y', which='major', labelsize=30)
+    ax.grid(which='minor', alpha=0.3, linestyle='dashed')
+    ax.grid(which='major', alpha=0.3)
+    ax.set_xlabel('Time (s)', fontsize = 30, weight = "bold")
+    ax.set_ylabel('Force Derivative (N)', fontsize = 30, weight = "bold")    
+    plt.plot([time1[i] for i in range(0,len(time1)-delta,delta)], derivative)
+    plt.show()
+
+
+
+
+
+#--------------------------------------------------------------------
+#---------------------------FORCE_VS_HALL_VS_TIME--------------------
+#--------------------------------------------------------------------
+def force_hall_time():
+    ax1 = plt.subplot(111,  projection='3d')
+    merged_df_hall_mean = pd.read_csv("/home/rustam/catkin_ws/src/calibrate_rgb_sensor_rustam/src/new setup/Force vs Distance/trials/all_csv_processed/mean_column_hall.csv",index_col=None,header=0)  
+    merged_df_force_mean = pd.read_csv("/home/rustam/catkin_ws/src/calibrate_rgb_sensor_rustam/src/new setup/Force vs Distance/trials/all_csv_processed/mean_column_force.csv",index_col=None,header=0) 
+
+    merged_df_hall_mean = merged_df_hall_mean['mean'] - merged_df_hall_mean['mean'].iat[1]
+    merged_df_hall_mean = -merged_df_hall_mean
+    #print(merged_df_hall_mean)
+    
+    
+    xline = merged_df_force_mean
+    yline = merged_df_hall_mean
+    zline = time1
+    ax1.scatter(xline, yline, zline, marker='.')
+
+    ax2 = plt.subplot(111,  projection='3d')
+
+    cx = np.ones_like(xline) * ax1.get_xlim3d()[0]
+    cy = np.ones_like(xline) * ax1.get_ylim3d()[1]
+    cz = np.ones_like(zline) * ax1.get_zlim3d()[0]
+    ax2.scatter(xline, yline, zline, marker='.', c = 'black')
+    ax2.scatter(xline, yline, cz, marker='.', alpha = 0.05, c = 'r')
+    ax2.scatter(xline, cy, zline, marker='.', alpha = 0.05, c = 'g')
+    ax2.scatter(cx, yline, zline, marker='.', alpha = 0.05, c = 'b')
+    ax2.set_xlim3d(ax1.get_xlim3d())
+    ax2.set_ylim3d(ax1.get_ylim3d())
+    ax2.set_zlim3d(ax1.get_zlim3d())
+
+    ax2.set_xlabel('Force', fontsize=30, weight = 'bold', labelpad=40)
+    ax2.set_ylabel('Displacement', fontsize=30, weight = 'bold', labelpad=30)
+    ax2.set_zlabel('Time', fontsize=30, weight = 'bold',rotation=90, labelpad=10)
+    ax2.tick_params(axis='x', which='major', labelsize=30)
+    ax2.tick_params(axis='y', which='major', labelsize=30)
+    ax2.tick_params(axis='z', which='major', labelsize=30)
+    
+
+    plt.show() 
+
+
+#--------------------------------------------------------------------
+#---------------------------HALL_VS_TIME-----------------------------
+#--------------------------------------------------------------------
+def hall_vs_time():
+
+    li_hall = []
+    li_hall.append(df1["top"])
+    li_hall.append(df2["top"])
+    li_hall.append(df3["top"])
+    li_hall.append(df4["top"])
+    li_hall.append(df5["top"])
+    li_hall.append(df6["top"])
+    li_hall.append(df7["top"])
+    li_hall.append(df8["top"])
+    li_hall.append(df9["top"])
+    li_hall.append(df10["top"])
+
+    #concatinate all "hall" columns into one dataframe "frame"
+    merged_hall = pd.concat(li_hall, axis=1, ignore_index=True)
+
+    #put the dataframe "frame" into merged/merged.csv
+    merged_hall.to_csv("/home/rustam/catkin_ws/src/calibrate_rgb_sensor_rustam/src/new setup/Force vs Distance/trials/all_csv_processed/merged_hall.csv", index=False, header=1)
+
+    #create dataframe "merged_df"
+    merged_df_hall = pd.read_csv("/home/rustam/catkin_ws/src/calibrate_rgb_sensor_rustam/src/new setup/Force vs Distance/trials/all_csv_processed/merged_hall.csv",index_col=1)
+
+    #find mean column of all fz columns
+    merged_df_hall['mean'] = merged_df_hall.iloc[0:2413, 0:9].median(axis=1, skipna=False, numeric_only=None)
+    #print(merged_df_hall['mean'])
+
+    #create csv file "mean_column.csv" with only mean column
+    merged_df_hall['mean'].to_csv("/home/rustam/catkin_ws/src/calibrate_rgb_sensor_rustam/src/new setup/Force vs Distance/trials/all_csv_processed/mean_column_hall.csv",header=['mean'],index=False)
+
+    #row number of mean column of "merged_df" dataframe
+    time = len(merged_df_hall['mean'].index)
+
+    #mean time of all experiments
+    mean_time_hall = linspace(0, up_time, time)
+
+    fig = plt.figure()
+    font = FontProperties()
+    ax = fig.add_subplot(1, 1, 1)
+    #ax.set_title("Force vs Distance", fontproperties=font)
+
+
+
+    trial1 = plt.plot(time1, df1['top'],alpha = 0.3, label='Trial #1') #alpha = transparency
+    trial2 = plt.plot(time1, df2['top'],alpha = 0.3, label='Trial #2')
+    trial3 = plt.plot(time1, df3['top'],alpha = 0.3, label='Trial #3') 
+    trial4 = plt.plot(time1, df4['top'],alpha = 0.3, label='Trial #4')
+    trial5 = plt.plot(time1, df5['top'],alpha = 0.3, label='Trial #5')
+    trial6 = plt.plot(time1, df6['top'],alpha = 0.3, label='Trial #6')
+    trial7 = plt.plot(time1, df7['top'],alpha = 0.3, label='Trial #7')
+    trial8 = plt.plot(time1, df8['top'],alpha = 0.3, label='Trial #8')
+    trial9 = plt.plot(time1, df9['top'],alpha = 0.3, label='Trial #9')
+    trial10 = plt.plot(time1, df10['top'],alpha = 0.3, label='Trial #10')
+
+
+    x_values_hall = [time1,time1]
+    y_values_hall = [merged_hall.iloc[0:nrows, :].min(axis=1), merged_hall.iloc[0:nrows, :].max(axis=1)]
+
+
+    #plt.plot(x_values_hall, y_values_hall, '0.8', linestyle='solid',label = 'Variance',linewidth=6)
+    mean_hall = plt.plot(mean_time_hall, merged_df_hall['mean'],linestyle='dashed', color='black',linewidth=2, label = 'Median of 10 trials')
+
+
+    legend = ax.legend(fontsize = 20)
+    #legend.legendHandles[0]._legmarker.set_markersize(50)
+
+    major_ticks_x = np.arange(0, 10.0, 0.5)
+    major_ticks_y = np.arange(0, 15.0, 1.0)
+    #minor_ticks = np.arange(0, 10.0, 0.5)
+    ax.set_xticks(major_ticks_x)
+    ax.set_yticks(major_ticks_y)
+    #ax.set_xticks(minor_ticks, minor=True)
+    ax.tick_params(axis='x', which='major', labelsize=30)
+    ax.tick_params(axis='y', which='major', labelsize=30)
+    ax.grid(which='minor', alpha=0.3, linestyle='dashed')
+    ax.grid(which='major', alpha=0.3)
+
+    ax.set_xlabel('Time (s)', fontsize = 30, weight = "bold")
+    ax.set_ylabel('Displacement (mm)', fontsize = 30, weight = "bold")
+
+    #plt.show()
+
+
+
+
+#---------------------------------------------------------------------
+#---------------------------FORCE_VS_TIME-----------------------------
+#---------------------------------------------------------------------
+def force_vs_time():
+
+    li = []
+    li.append(-df1["fz"])
+    li.append(-df2["fz"])
+    li.append(-df3["fz"])
+    li.append(-df4["fz"])
+    li.append(-df5["fz"])
+    li.append(-df6["fz"])
+    li.append(-df7["fz"])
+    li.append(-df8["fz"])
+    li.append(-df9["fz"])
+    li.append(-df10["fz"])
+    #concatinate all "pseudo_fz" columns into one dataframe "frame"
+    merged = pd.concat(li, axis=1, ignore_index=True)
+
+    #put the dataframe "frame" into merged/merged.csv
+    merged.to_csv("/home/rustam/catkin_ws/src/calibrate_rgb_sensor_rustam/src/new setup/Force vs Distance/trials/all_csv_processed/merged_force.csv", index=False, header=1)
+
+    #create dataframe "merged_df"
+    merged_df = pd.read_csv("/home/rustam/catkin_ws/src/calibrate_rgb_sensor_rustam/src/new setup/Force vs Distance/trials/all_csv_processed/merged_force.csv",index_col=1)
+
+    #find mean column of all fz columns
+    merged_df['mean'] = merged_df.iloc[0:2413, 0:9].median(axis=1, skipna=True, numeric_only=None)
+
+
+    #create csv file "mean_column.csv" with only mean column
+    merged_df['mean'].to_csv("/home/rustam/catkin_ws/src/calibrate_rgb_sensor_rustam/src/new setup/Force vs Distance/trials/all_csv_processed/mean_column_force.csv",header=['mean'],index=False)
+
+    #print(merged_df)
+
+    #row number of mean column of "merged_df" dataframe
+    time = len(merged_df['mean'].index)
+
+    #mean time of all experiments
+    mean_time = linspace(0, up_time, time)
+
+    fig = plt.figure()
+    ax = fig.add_subplot(1, 1, 1)
+
+
+    x_values = [time1,time1]
+    y_values = [merged.iloc[0:nrows, :].min(axis=1), merged.iloc[0:nrows, :].max(axis=1)]
+
+
+    plt.plot(x_values, y_values, '0.8', linestyle='solid',label = 'Variance',linewidth=6)
+
+
+
+    
+    trial1 = plt.plot(time1, -df1['fz'],alpha = 0.3, label='Trial #1') #alpha = transparency
+    trial2 = plt.plot(time1, -df2['fz'],alpha = 0.3, label='Trial #2')
+    trial3 = plt.plot(time1, -df3['fz'],alpha = 0.3, label='Trial #3') 
+    trial4 = plt.plot(time1, -df4['fz'],alpha = 0.3, label='Trial #4')
+    trial5 = plt.plot(time1, -df5['fz'],alpha = 0.3, label='Trial #5')
+    trial6 = plt.plot(time1, -df6['fz'],alpha = 0.3, label='Trial #6')
+    trial7 = plt.plot(time1, -df7['fz'],alpha = 0.3, label='Trial #7')
+    trial8 = plt.plot(time1, -df8['fz'],alpha = 0.3, label='Trial #8')
+    trial9 = plt.plot(time1, -df9['fz'],alpha = 0.3, label='Trial #9')
+    trial10 = plt.plot(time1, -df10['fz'],alpha = 0.3, label='Trial #10')
+    
+
+    mean = plt.plot(mean_time, merged_df['mean'],linestyle='dashed', color='black',linewidth=2, label = 'Median of 10 trials')
+
+
+    legend = ax.legend(fontsize = 20)
+    #legend.legendHandles[0]._legmarker.set_markersize(50)
+
+    major_ticks_x = np.arange(0, 10.0, 0.5)
+    major_ticks_y = np.arange(0, 65.0, 5)
+    #minor_ticks = np.arange(0, 10.0, 0.5)
+    ax.set_xticks(major_ticks_x)
+    ax.set_yticks(major_ticks_y)
+    #ax.set_xticks(minor_ticks, minor=True)
+    ax.tick_params(axis='x', which='major', labelsize=30)
+    ax.tick_params(axis='y', which='major', labelsize=30)
+    ax.grid(which='minor', alpha=0.3, linestyle='dashed')
+    ax.grid(which='major', alpha=0.3)
+
+    ax.set_xlabel('Time (s)', fontsize = 30, weight = "bold")
+    ax.set_ylabel('Force (N)', fontsize = 30, weight = "bold")
+    #plt.show()
+
+
+def create_gif():
+
+    merged_df = pd.read_csv("/home/rustam/catkin_ws/src/calibrate_rgb_sensor_rustam/src/new setup/Force vs Distance/trials/all_csv_processed/merged.csv",index_col=None, header=0)
+    merged_df_mean = pd.read_csv("/home/rustam/catkin_ws/src/calibrate_rgb_sensor_rustam/src/new setup/Force vs Distance/trials/all_csv_processed/mean_column.csv",index_col=None, header=0)
+    #print(merged_df_mean)
+
+    y_values = [merged_df.iloc[0:nrows, :].min(axis=1), merged_df.iloc[0:nrows, :].max(axis=1)]
+
+    #row number of mean column of "merged_df" dataframe
+    time = len(merged_df_mean['mean'].index)
+
+    #mean time of all experiments
+    mean_time = linspace(0, up_time, time)
+
+
+    folder_to_gif = '/home/rustam/catkin_ws/src/calibrate_rgb_sensor_rustam/src/new setup/Force vs Distance/trials/all_csv_processed/gif_test'   # save the figure to file
+
+
+    for i in range(0, len(merged_df_mean['mean']), 100):
+        fig2 = plt.figure(figsize=(60,40),dpi=30)
+        ax2 = fig2.add_subplot(1, 1, 1)
+        plt.rcParams.update({'figure.max_open_warning': 0})
+
+        plt.plot([time1[0:i], time1[0:i]], [y_values[0][0:i], y_values[1][0:i]], '0.8', linestyle='solid',label = 'Variance',linewidth=6)
+
+        plt.plot(mean_time[0:i,], merged_df_mean['mean'].iloc[0:i,],linestyle='dashed', color='black',linewidth=2, label = 'Median of 10 trials')
+        ax2.legend(fontsize = 20)
+        major_ticks_x = np.arange(0, 10.0, 0.5)
+        major_ticks_y = np.arange(0, 65.0, 5)
+        ax2.set_xticks(major_ticks_x)
+        ax2.set_yticks(major_ticks_y)
+        ax2.tick_params(axis='x', which='major', labelsize=60)
+        ax2.tick_params(axis='y', which='major', labelsize=60)
+        ax2.grid(which='minor', alpha=0.3, linestyle='dashed')
+        ax2.grid(which='major', alpha=0.3)
+
+        ax2.set_xlabel('Time (s)', fontsize = 60, weight = "bold")
+        ax2.set_ylabel('Force (N)', fontsize = 60, weight = "bold")
+        plt.savefig(folder_to_gif + "/img%02d.png" % i)
+        
+
+
+#'fz' or 'top'
+def plot_all_trials_wrt_time(name_of_column):
+    
+    fig = plt.figure()
+    ax = fig.add_subplot(1, 1, 1)
+    trial1 = plt.plot(time1, df1[name_of_column],alpha = 0.3, label='Trial #1') #alpha = transparency
+    trial2 = plt.plot(time1, df2[name_of_column],alpha = 0.3, label='Trial #2')
+    trial3 = plt.plot(time1, df3[name_of_column],alpha = 0.3, label='Trial #3') 
+    trial4 = plt.plot(time1, df4[name_of_column],alpha = 0.3, label='Trial #4')
+    trial5 = plt.plot(time1, df5[name_of_column],alpha = 0.3, label='Trial #5')
+    trial6 = plt.plot(time1, df6[name_of_column],alpha = 0.3, label='Trial #6')
+    trial7 = plt.plot(time1, df7[name_of_column],alpha = 0.3, label='Trial #7')
+    trial8 = plt.plot(time1, df8[name_of_column],alpha = 0.3, label='Trial #8')
+    trial9 = plt.plot(time1, df9[name_of_column],alpha = 0.3, label='Trial #9')
+    trial10 = plt.plot(time1, df10[name_of_column],alpha = 0.3, label='Trial #10') 
+
+    if (name_of_column == 'fz'):
+        major_ticks_x = np.arange(0, 10.0, 0.5)
+        major_ticks_y = np.arange(0, 65.0, 5)
+        #minor_ticks = np.arange(0, 10.0, 0.5)
+        ax.set_xticks(major_ticks_x)
+        ax.set_yticks(major_ticks_y)
+        #ax.set_xticks(minor_ticks, minor=True)
+        ax.tick_params(axis='x', which='major', labelsize=30)
+        ax.tick_params(axis='y', which='major', labelsize=30)
+        ax.grid(which='minor', alpha=0.3, linestyle='dashed')
+        ax.grid(which='major', alpha=0.3)
+
+        ax.set_xlabel('Time (s)', fontsize = 30, weight = "bold")
+        ax.set_ylabel('Force (N)', fontsize = 30, weight = "bold")
+        legend = ax.legend(fontsize = 20)
+
+    elif(name_of_column == 'top'):
+        major_ticks_x = np.arange(0, 10.0, 0.5)
+        major_ticks_y = np.arange(0, 15.0, 1.0)
+        #minor_ticks = np.arange(0, 10.0, 0.5)
+        ax.set_xticks(major_ticks_x)
+        ax.set_yticks(major_ticks_y)
+        #ax.set_xticks(minor_ticks, minor=True)
+        ax.tick_params(axis='x', which='major', labelsize=30)
+        ax.tick_params(axis='y', which='major', labelsize=30)
+        ax.grid(which='minor', alpha=0.3, linestyle='dashed')
+        ax.grid(which='major', alpha=0.3)
+        ax.set_xlabel('Time (s)', fontsize = 30, weight = "bold")
+        ax.set_ylabel('Displacement (mm)', fontsize = 30, weight = "bold")
+        legend = ax.legend(fontsize = 20)
+
+    #plt.show()
+
+
+
+
+def main():
+    #force_vs_time()
+    #hall_vs_time()
+    #plt.show()
+    #create_gif()
+    #plot_all_trials_wrt_time('top')
+    #force_hall_time()
+    #mean_UR5()
+    #derivative_force_vs_time()
+    #derivative_hall_vs_time()
+    mean_UR5()
+
+if __name__ == "__main__":
+    main()
+
+
+
+
+
+#VEL CONTROL
+#include <ros/ros.h>
+#include <tf/transform_broadcaster.h> //header for TransformBroadcaster object
+#include <tf/transform_listener.h>
+#include <std_msgs/Float64.h>
+#include "ros/time.h"
+#include <time.h>
+#include "tactile_servo_msgs/ContsFeats.h"
+#include "tactile_servo_msgs/OneContFeats.h"
+#include <cmath>
+
+#include <geometry_msgs/TwistStamped.h>
+#include <geometry_msgs/TwistStamped.h>
+#include "geometry_msgs/WrenchStamped.h"
+#include <trajectory_msgs/JointTrajectory.h>
+#include <sensor_msgs/JointState.h>
+#include "ur5_nsh_experiment.h"
+#include "my_msgs/my_message.h"
+#include <rosbag/bag.h>
+#include <rosserial_arduino/hallsensor.h>
+#include <wittenstein_msgs/wittenstein.h>
+
+my_msgs::my_message global_msg;
+rosbag::Bag bag;
+wittenstein_msgs::wittenstein wittenstein_msg;
+
+//Initial variables
+double Z_TEMP;
+double Y_TEMP;
+double X_TEMP;
+double Z_INIT;
+double Y_INIT;
+double X_INIT;
+double Z_NOW;
+double Z_DOWN;
+double Y_NOW;
+double X_NOW;
+double Z_TARGET; // Target position for Z-coordinate of end-effector
+double oldef_to_newef = 0.225; // from original end-effector to new end-effector (22.5cm)
+double weiss_height = 0.07; // height of weiss sensor (7cm)
+double honeycomb_buckling_height = 0.02; // height of buckling (2cm)
+
+double F_des, hall_des, hall_real;
+double F_real;
+double pseudo_force;
+double Kp,Kd,Ki;
+double Vel_old;
+double Vel_old_old;
+double Vel_new;
+double dumper;
+double integral;
+double force_error_old;
+double force_error_new;
+double hall_z; // displacement of hall sensors along with z
+
+
+
+PoseShow::PoseShow()
+{
+	is_transform_tool0_ = false;
+  	not_first_time = true;
+}
+
+PoseShow::~PoseShow(){}
+
+
+URutil::URutil()
+{
+  	is_new_msg_ = false;
+
+  	pub_velocities = n.advertise<geometry_msgs::Twist>("/desired_Vx_Vy_Vz", 1000);
+
+  	pub_point = n.advertise<geometry_msgs::PointStamped>("/topic_point", 100);
+
+  	pub_mode = n.advertise<std_msgs::Float64>("/topic_mode", 100);
+
+  	pub_state = n.advertise<std_msgs::Float64>("/topic_state", 100);
+
+  	pub_angleZ = n.advertise<std_msgs::Float64>("/topic_angleZ", 100);
+
+
+  	fb_feats_sub = n.subscribe("/fb_feats", 1,  &URutil::cb_fb_feats_sub,this);
+
+  	is_init_exper_ = false;
+  	is_at_home_ = false;
+  	boollet_ = false;
+  	couner_ = 0;
+  	recieved_joint_state_ = false;
+  	trjp_.velocities.resize(6);
+  	trj_.points.push_back(trjp_);
+  	trj_.points.push_back(trjp_);
+
+//   	ROS_INFO("initializing joint names");
+	trj_.joint_names.push_back("shoulder_pan_joint");
+	trj_.joint_names.push_back("shoulder_lift_joint");
+	trj_.joint_names.push_back("elbow_joint");
+	trj_.joint_names.push_back("wrist_1_joint");
+	trj_.joint_names.push_back("wrist_2_joint");
+	trj_.joint_names.push_back("wrist_3_joint");
+
+}
+URutil::~URutil(){}
+
+void URutil::cb_fb_feats_sub(const tactile_servo_msgs::ContsFeatsConstPtr& msg_){
+    if (msg_->control_features.size() == 1){
+    	is_in_contact_ur_ = msg_->control_features[0].is_contact;
+        pixels_in_contact_ur_ = msg_->control_features[0].num_pixels_contact;
+        highest_force_cell_ur_ = msg_->control_features[0].highest_force_cell;
+        real_total_force_ur_ = msg_->control_features[0].real_total_force;
+
+	is_new_msg_ = true;
+    }
+}
+
+void URutil::send_velocity(geometry_msgs::Twist in_vel)
+{
+  	in_vel_.angular = in_vel.angular;
+  	in_vel_.linear = in_vel.linear;
+  	pub_velocities.publish(in_vel_);
+
+}
+
+
+void PoseShow::pose_init_create(){
+	if (is_transform_tool0_== false)
+	{
+		listener.waitForTransform("tool0", ros::Time(0), "robot_base",ros::Time(0), "robot_base", ros::Duration(10));
+		try
+		{
+			listener.lookupTransform("robot_base", "tool0", ros::Time(0), stransform);
+			is_transform_tool0_ = true;
+		}
+		catch (tf::TransformException &ex)
+		{
+			ROS_ERROR("%s", ex.what());
+		}
+
+		init_position = stransform.getOrigin();
+	  	X_now_test_.header.frame_id = stransform.frame_id_.c_str();
+	  	X_now_test_.pose.position.x = init_position[0];
+	  	X_now_test_.pose.position.y = init_position[1];
+	  	X_now_test_.pose.position.z = init_position[2];
+
+	  	Z_INIT = init_position[2];
+	  	X_INIT = init_position[0];
+	  	Y_INIT = init_position[1];
+
+	  	Z_TEMP = init_position[2];
+	  	X_TEMP = init_position[0];
+	  	Y_TEMP = init_position[1];
+	  	not_first_time = false;
+  	}
+  	tf::Quaternion q_init_pose = stransform.getRotation();
+  	geometry_msgs::Quaternion quat;
+  	quat.w = q_init_pose.w();
+  	quat.w = q_init_pose.x();
+  	quat.w = q_init_pose.y();
+  	quat.w = q_init_pose.z();
+  	X_now_test_.pose.orientation = quat;
+}
+
+
+void PoseShow::pose_now()
+{
+  /*
+  The listener's buffer is literally empty immediately after creating tf listener,
+  therefore it is good practice to wait some time after the listener has been created,
+  so that the buffer can fill up
+  */
+	listener_pose_now.waitForTransform("tool0", ros::Time(0), "robot_base",ros::Time(0), "robot_base", ros::Duration(10));
+	try
+	{
+    //we request (query) the listener for a specific transformation
+		listener_pose_now.lookupTransform("robot_base", "tool0", ros::Time(0), nowtransform);
+	}
+	catch (tf::TransformException &ex)
+	{
+		ROS_ERROR("%s", ex.what());
+	}
+	Z_NOW = nowtransform.getOrigin().getZ() - oldef_to_newef; // get Z position of tool0 relative to base frame
+	X_NOW = nowtransform.getOrigin().getX(); // get X postion of tool0 realtive to world (base frame)
+	Y_NOW = nowtransform.getOrigin().getY(); // get Y postion of tool0 realtive to world (base frame)
+  	global_msg.z = Z_NOW;
+}
+
+
+void force_z_Callback(const wittenstein_msgs::wittenstein wittenstein_msg) // callback message for weiss sensor
+{
+  	global_msg.fz = wittenstein_msg.fz;
+  	//ROS_INFO_STREAM(global_msg);
+}
+
+void hallsensor_callback(const rosserial_arduino::hallsensor::ConstPtr& msg){
+    global_msg.top  = msg->top;
+    //global_msg.bot = msg->bot;
+    //ROS_INFO_STREAM(global_msg);
+}
+
+double square_wave(double amp, int samples, int f)
+{
+	return amp - amp*((samples/f)%2);
+}
+
+// MAIN PROGRAM STARTS:
+int main(int argc, char** argv)
+
+{
+	ROS_INFO("pub_poses_exper");
+	ros::Time::init();
+	
+	//bag.open("/home/rustam/catkin_ws/src/calibrate_rgb_sensor_rustam/src/rosbag_data_with_hall_sensor/file3.bag", rosbag::bagmode::Write);
+	geometry_msgs::Twist velocity;
+	geometry_msgs::Twist in_velocityzero;
+	in_velocityzero.linear.x = 0;
+	in_velocityzero.linear.y = 0;
+	in_velocityzero.linear.z = 0.0;
+	in_velocityzero.angular.x = 0;
+	in_velocityzero.angular.y = 0;
+	in_velocityzero.angular.z = 0;
+
+	geometry_msgs::Twist in_velocitydown_fast;
+	in_velocitydown_fast.linear.x = 0;
+	in_velocitydown_fast.linear.y = 0;
+	in_velocitydown_fast.linear.z = -0.02;
+	in_velocitydown_fast.angular.x = 0;
+	in_velocitydown_fast.angular.y = 0;
+	in_velocitydown_fast.angular.z = 0;
+	geometry_msgs::Twist in_velocitydown_slow;
+	in_velocitydown_slow.linear.x = 0;
+	in_velocitydown_slow.linear.y = 0;
+	in_velocitydown_slow.linear.z = -0.007;
+	in_velocitydown_slow.angular.x = 0;
+	in_velocitydown_slow.angular.y = 0;
+	in_velocitydown_slow.angular.z = 0;
+	geometry_msgs::Twist in_velocityup_fast;
+	in_velocityup_fast.linear.x = 0;
+	in_velocityup_fast.linear.y = 0;
+	in_velocityup_fast.linear.z = 0.02;
+	in_velocityup_fast.angular.x = 0;
+	in_velocityup_fast.angular.y = 0;
+	in_velocityup_fast.angular.z = 0;
+
+
+	ros::init(argc, argv, "init_before_any_exploration_node");
+  	ros::NodeHandle nh; //NodeHandle is the main access point to communications with the ROS system
+  	ros::Subscriber sub_force_z = nh.subscribe("/wittenstein_topic", 1000, force_z_Callback);
+  	ros::Subscriber sub_hallsensor = nh.subscribe("hallsensor_topic", 1000, &hallsensor_callback);
+	ros::Publisher pub_des_force = nh.advertise<geometry_msgs::Point>("/force_des", 1000);
+	ros::Publisher pub_pseudo_force = nh.advertise<geometry_msgs::Point>("/force_pseudo", 1000);
+  	ros::Publisher pub_des_hall = nh.advertise<geometry_msgs::Point>("/hall_des", 1000);
+  	ros::Publisher pub_real_hall = nh.advertise<geometry_msgs::Point>("/hall_real", 1000);
+
+
+	//F_des = 3.00;
+	Kp = 0.002;
+	Kd = 0.97; // 0.972
+	Ki = 0.0013;
+	
+	ros::Rate loop_rate(500); // previously 125,140
+	ROS_INFO("pub_poses_exper");
+
+	PoseShow PoseShow_test;
+	URutil Experiment;
+	Z_TARGET = weiss_height - honeycomb_buckling_height; // Target position for Z-coordinate of end-effector
+	ros::spinOnce();
+	PoseShow_test.pose_now(); // getting X,Y,Z coordinates of end-effector relative to base frame
+
+  	// stop for some time and send the values
+  	ros::Time start_time = ros::Time::now();
+  	ros::Duration timeout(0.2);
+  	ros::Duration timeout2(2.0);
+  	ROS_INFO("STOP and SEND the values");
+  	while((ros::ok()) && (ros::Time::now() - start_time < timeout)) {
+		ROS_INFO("Z_NOW before experiment: %f", Z_NOW); //send the values of Z-coordinate of end-effector relative to base frame
+ 	}
+
+	int i,i2 = 0;
+	double num[40],sum=0.0, hall_z_average=0.0;
+	double num2[10],sum2=0.0, pseudo_force_average=0.0;
+	while(ros::ok() && Z_NOW > Z_TARGET+0.03)
+	{	
+		// 50% duty cycle: f = 200, n = 400
+		int f = 1000;
+		int up_limit = 10;
+		int low_limit = 0;
+		for (int n = 0; n < 2000; n++){
+			F_des = up_limit - (up_limit-low_limit)*((n/f)%2); // change value with square wave
+			geometry_msgs::Point point1;
+			geometry_msgs::Point point2;
+			geometry_msgs::Point point3;
+
+
+
+			//Moving Average of hall displacement
+			sum = sum - num[i];
+			hall_z = -((global_msg.top) - 16.08); // before:20.45 // removed:  + global_msg.bot
+			num[i] = hall_z;
+			sum += num[i];
+			i = (i+1)%40;
+			hall_z_average = sum/40;
+			// if (i == 9){
+			// 	for(int i = 0; i < 10; i++){
+			//   		ROS_INFO("nums[%i]: %f", i, num[i]);
+			// 	}	
+			// 	ROS_INFO("average: %f", average);
+			// }			
+			// if(i == 10){
+			// 	for(int i = 0; i < 10; i++){
+			//   		ROS_INFO("nums[%i]: %f", i, num[i]);
+			// 	}	
+			// 	average = sum/10;
+			// 	ROS_INFO("average: %f", average);							
+			// 	i = 0;
+			// 	sum = 0;
+			// 	average = 0;
+			// }
+			// num[i] = hall_z;
+			// sum += num[i];
+			// i++;
+
+			//hall_z_average = hall_z;
+
+
+
+			point1.z = -F_des;
+			pub_des_force.publish(point1);
+
+			//pseudo_force = -1.14*global_msg.top+6;
+			//pseudo_force = -1.26*global_msg.top+6.63;
+			//-71347 + 85196x + -43196x^2 + 12407x^3 + -2253x^4 + 272x^5 + -22.1x^6 + 1.2x^7 + -0.0417x^8 + 8.41E-04x^9 + -7.47E-06x^10
+			//-34.6 + 27.4x + -45x^2 + 47x^3 + -24.8x^4 + 7.22x^5 + -1.25x^6 + 0.131x^7 + -8.24E-03x^8 + 2.85E-04x^9 + -4.18E-06x^10
+			//GOOGLE: pseudo_force = -34.6 + 27.4*hall_z - 45*pow(hall_z,2) + 47*pow(hall_z,3) - 24.8*pow(hall_z,4) + 7.22*pow(hall_z,5) - 1.25*pow(hall_z,6) + 0.131*pow(hall_z,7) - 8.24E-03*pow(hall_z,8) + 2.85E-04*pow(hall_z,9) - 4.18E-06*pow(hall_z,10);
+			//pseudo_force = -21.9509 + 14.8373*hall_z - 13.1354*pow(hall_z,2) + 12.0331*pow(hall_z,3) - 7.1980 *pow(hall_z,4) + 2.3521*pow(hall_z,5) - 0.4406*pow(hall_z,6) + 0.0492*pow(hall_z,7) - 0.0033*pow(hall_z,8) + 0.0001*pow(hall_z,9) -0.0000*pow(hall_z,10);
+			//NICE:pseudo_force = 11.1238 + 10.7914*hall_z - 6.4228*pow(hall_z,2) + 1.5443*pow(hall_z,3) - 1.3604*pow(hall_z,4) + 0.9089*pow(hall_z,5) - 0.2715*pow(hall_z,6) + 0.0420*pow(hall_z,7) - 0.0036*pow(hall_z,8) + 0.0002*pow(hall_z,9) -0.0000*pow(hall_z,10);
+			//pseudo_force = -59.3360 + 109.3521*hall_z - 93.7368*pow(hall_z,2) + 55.0721*pow(hall_z,3) - 20.8738*pow(hall_z,4) + 4.9602*pow(hall_z,5) - 0.7395*pow(hall_z,6) + 0.0689*pow(hall_z,7) - 0.0039*pow(hall_z,8) + 0.0001*pow(hall_z,9) -0.0000*pow(hall_z,10);
+			//pseudo_force = 0.5591*pow(hall_z,0) - 40.9732*pow(hall_z,1) + 60.4648*pow(hall_z,2) - 30.2949*pow(hall_z,3) + 7.5544 *pow(hall_z,4) - 1.0395*pow(hall_z,5) + 0.0801*pow(hall_z,6) - 0.0032*pow(hall_z,7) + 0.0001*pow(hall_z,8);
+
+			// if(hall_z_average < 3){
+			// 	pseudo_force = -0.5636*pow(hall_z_average,4) + 5.5273*pow(hall_z_average,3) - 20.7856 *pow(hall_z_average,2) + 34.6858*pow(hall_z_average,1) - 6.3596;
+			// }else if (hall_z_average >= 3 && hall_z_average <= 7.4){
+			// 	pseudo_force = -0.3320*pow(hall_z_average,4) + 5.8234*pow(hall_z_average,3) - 36.2045*pow(hall_z_average,2) + 95.0939*pow(hall_z_average,1) - 75.9442;
+			// }else{
+			// 	pseudo_force = 0.2054*pow(hall_z_average,4) - 7.0430*pow(hall_z_average,3) + 91.5786*pow(hall_z_average,2) - 530.4383*pow(hall_z_average,1) + 1158.3924;
+			// }
+			// if(hall_z_average < 3){
+			// 	pseudo_force = -0.5636*pow(hall_z_average,4) + 5.4145*pow(hall_z_average,3) - 19.9650*pow(hall_z_average,2) + 32.6485*pow(hall_z_average,1) - 4.6766;
+			// }else if (hall_z_average >= 3 && hall_z_average <= 7.4){
+			// 	pseudo_force = -0.3320*pow(hall_z_average,4) + 5.7570*pow(hall_z_average,3) - 35.3360*pow(hall_z_average,2) + 91.5170*pow(hall_z_average,1) - 71.2793;
+			// }else{
+			// 	pseudo_force = 0.2054*pow(hall_z_average,4) - 7.0019*pow(hall_z_average,3) + 90.5253*pow(hall_z_average,2) - 521.3332*pow(hall_z_average,1) + 1132.0985;
+			// }			
+			// if(hall_z_average < 3){
+			// 	pseudo_force = -0.5636*pow(hall_z_average,4) + 6.6544*pow(hall_z_average,3) - 29.9218*pow(hall_z_average,2) + 59.8987*pow(hall_z_average,1) - 29.6250;
+			// }else if (hall_z_average >= 3 && hall_z_average <= 7.4){
+			// 	pseudo_force = -0.3320*pow(hall_z_average,4) + 6.4875*pow(hall_z_average,3) - 45.4377*pow(hall_z_average,2) + 135.8320*pow(hall_z_average,1) - 133.2909;
+			// }else{
+			// 	pseudo_force = 0.2054*pow(hall_z_average,4) - 7.4538*pow(hall_z_average,3) + 102.4512*pow(hall_z_average,2) - 627.4019*pow(hall_z_average,1) + 1447.3994;
+			// }	
+			if(hall_z_average <= 4){
+				pseudo_force = 0.4918*pow(hall_z_average,3) - 3.9749*pow(hall_z_average,2) + 8.8317*pow(hall_z_average,1) + 5.6288;
+			}else if (hall_z_average > 4 && hall_z_average <= 7.4){
+				pseudo_force = 0.9646*pow(hall_z_average,4) - 22.1932*pow(hall_z_average,3) + 186.8626*pow(hall_z_average,2) - 681.9955*pow(hall_z_average,1) + 920.7273;
+			}else{
+				pseudo_force = -0.0249*pow(hall_z_average,3) + 4.9120*pow(hall_z_average,2) - 74.0127*pow(hall_z_average,1) + 296.3840;
+			}			
+			//Moving Average of pseudo force
+			// sum2 = sum2 - num2[i2];
+			// num2[i2] = pseudo_force;
+			// sum2 += num2[i2];
+			// i2 = (i2+1)%10;
+			// pseudo_force_average = sum2/10;
+
+			point2.z = -pseudo_force;
+			pub_pseudo_force.publish(point2);
+			point3.z = hall_z_average;
+			pub_real_hall.publish(point3);
+			//force_error_new = F_des-(-global_msg.fz);
+			force_error_new = F_des-(pseudo_force);
+			integral = Ki*(force_error_new - force_error_old);
+			ROS_INFO("hall_z: %f", hall_z_average);
+			ROS_INFO("pseudo_force: %f", -pseudo_force);
+			ROS_INFO("vlz:%f", velocity.linear.z);
+			//ROS_INFO("integral: %f", integral);
+			//ROS_INFO("Kp: %f, F_real:%f, F_des:%f", Kp, global_msg.fz, F_des);
+			//ROS_INFO("Kp: %f, F_real:%f, F_des:%f", Kp, pseudo_force, F_des);
+			//ROS_INFO("Ki: %f, f_e_new:%f, f_e_old:%f, vlz:%f", Ki, force_error_new, force_error_old, velocity.linear.z);
+			//velocity.linear.z = -Kp*(F_des-(-global_msg.fz)) + integral;
+			velocity.linear.z = -Kp*(F_des-(pseudo_force)) + integral;
+			//force_error_old = F_des-(-global_msg.fz);
+			force_error_old = F_des-(pseudo_force);
+
+			// hall_des = 5.0 - 5*((n/f)%2); // change value from 6 to 5.5mm with square wave
+			// hall_real = global_msg.bot + global_msg.top;
+			// geometry_msgs::Point point1;
+			// geometry_msgs::Point point2;
+			// point1.z = hall_des;
+			// point2.z = hall_real;
+			// pub_des_hall.publish(point1);
+			// pub_real_hall.publish(point2);
+			// ROS_INFO("Kp: %f, hall_bot_real:%f,hall_top_real:%f , hall_des:%f", Kp, global_msg.bot, global_msg.top, hall_des);
+			// ROS_INFO("Velocity: %f", velocity.linear.z);
+			// velocity.linear.z = -Kp*(-hall_des + global_msg.bot + global_msg.top);
+
+			Experiment.send_velocity(velocity);
+			ros::spinOnce();
+			loop_rate.sleep();
+		}
+
+	}
+	Experiment.send_velocity(in_velocityzero);
+	//bag.close();
+	ROS_INFO("Experiment ENDED !!! FINAL Z_NOW = %f", Z_NOW);		
+	return 0;
+	// add some comment
+}
+
+
+
+#FORCE_DISTANCE_10_TRIALS
+import matplotlib.pyplot as plt
+from matplotlib.gridspec import GridSpec
+from datetime import datetime
+from random import sample
+import pandas as pd
+import time
+import numpy as np
+
+nrows = 2450
+df1 = pd.read_csv("/home/rustam/catkin_ws/src/calibrate_rgb_sensor_rustam/src/new setup/Force vs Distance/trials/all_csv_processed/trial1.csv",skiprows=[i for i in range(1, 80)], nrows=nrows)
+df2 = pd.read_csv("/home/rustam/catkin_ws/src/calibrate_rgb_sensor_rustam/src/new setup/Force vs Distance/trials/all_csv_processed/trial2.csv",skiprows=[i for i in range(1, 80)],nrows=nrows)
+df3 = pd.read_csv("/home/rustam/catkin_ws/src/calibrate_rgb_sensor_rustam/src/new setup/Force vs Distance/trials/all_csv_processed/trial3.csv",nrows=nrows)
+df4 = pd.read_csv("/home/rustam/catkin_ws/src/calibrate_rgb_sensor_rustam/src/new setup/Force vs Distance/trials/all_csv_processed/trial4.csv",nrows=nrows)
+df5 = pd.read_csv("/home/rustam/catkin_ws/src/calibrate_rgb_sensor_rustam/src/new setup/Force vs Distance/trials/all_csv_processed/trial5.csv",nrows=nrows)
+df6 = pd.read_csv("/home/rustam/catkin_ws/src/calibrate_rgb_sensor_rustam/src/new setup/Force vs Distance/trials/all_csv_processed/trial6.csv",nrows=nrows)
+df7 = pd.read_csv("/home/rustam/catkin_ws/src/calibrate_rgb_sensor_rustam/src/new setup/Force vs Distance/trials/all_csv_processed/trial7.csv",nrows=nrows)
+df8 = pd.read_csv("/home/rustam/catkin_ws/src/calibrate_rgb_sensor_rustam/src/new setup/Force vs Distance/trials/all_csv_processed/trial8.csv",nrows=nrows)
+df9 = pd.read_csv("/home/rustam/catkin_ws/src/calibrate_rgb_sensor_rustam/src/new setup/Force vs Distance/trials/all_csv_processed/trial9.csv",nrows=nrows)
+df10 = pd.read_csv("/home/rustam/catkin_ws/src/calibrate_rgb_sensor_rustam/src/new setup/Force vs Distance/trials/all_csv_processed/trial10.csv",nrows=nrows)
+
+
+#time1= np.linspace(0, 9.8, 2637)
+pseudo_force1 = -df1["fz"]
+
+#time2 = np.linspace(0, 9.9, 2617)
+pseudo_force2 = -df2["fz"]
+
+#time3 = np.linspace(0, 9.9, 2592)
+pseudo_force3 = -df3["fz"]
+
+#time4 = np.linspace(0, 9.7, 2478)
+pseudo_force4 = -df4["fz"]
+
+#time5 = np.linspace(0, 9.8, 2523)
+pseudo_force5 = -df5["fz"]
+
+#time6= np.linspace(0, 9.7, 2505)
+pseudo_force6 = -df6["fz"]
+
+time = np.linspace(0, 9.7, 2450)
+pseudo_force7 = -df7["fz"]
+
+#time8 = np.linspace(0, 9.8, 2460)
+pseudo_force8 = -df8["fz"]
+
+#time9 = np.linspace(0, 9.7, 2502)
+pseudo_force9 = -df9["fz"]
+
+#time10 = np.linspace(0, 9.9, 2504)
+pseudo_force10 = -df10["fz"]
+
+fig = plt.figure()
+ax = fig.add_subplot(1, 1, 1)
+ax.set_title("pseudo_force_before_experiment")
+plt.plot(time, pseudo_force1)
+plt.plot(time, pseudo_force2)
+plt.plot(time, pseudo_force3)
+plt.plot(time, pseudo_force4)
+plt.plot(time, pseudo_force5)
+plt.plot(time, pseudo_force6)
+plt.plot(time, pseudo_force7)
+plt.plot(time, pseudo_force8)
+plt.plot(time, pseudo_force9)
+plt.plot(time, pseudo_force10)
+
+plt.xticks(range(0, 13))
+plt.grid(linestyle='dashed')
+ax.set_xlabel('Time, s')
+ax.set_ylabel('Force, N')
+L = ax.legend()
+for i in range(0,10):
+    L.get_texts()[i].set_text("trial%01d" % (i+1))
+plt.show()
