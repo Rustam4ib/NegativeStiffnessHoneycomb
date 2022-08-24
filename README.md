@@ -115,10 +115,13 @@ git push -u origin_rustam main
 ```
 rosrun rosserial_python serial_node.py _port:=/dev/ttyACM0 _baud:=115200
 rosrun hallsensor hallsensor_listener
+roslaunch rosserial_python hall_adxl.launch
 ```
 # Dynamixel node
 ```
 rosrun dynamixel_sdk_examples read_write_node
+rostopic pub -1 /set_position dynamixel_sdk_examples/SetPosition "{id: 1, position: 1400}"
+rosservice call /get_position "id: 1"
 ```
 
 #
