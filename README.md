@@ -113,8 +113,12 @@ git push -u origin_rustam main
 # ROSSERIAL
 ### /home/rustam/snap/arduino/current/Arduino
 ```
-rosrun rosserial_python serial_node.py _port:=/dev/ttyACM1 _baud:=115200
+rosrun rosserial_python serial_node.py _port:=/dev/ttyACM0 _baud:=115200
 rosrun hallsensor hallsensor_listener
+```
+# Dynamixel node
+```
+rosrun dynamixel_sdk_examples read_write_node
 ```
 
 #
