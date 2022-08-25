@@ -120,7 +120,7 @@ roslaunch rosserial_python hall_adxl.launch
 # Dynamixel node
 ```
 rosrun dynamixel_sdk_examples read_write_node
-rostopic pub -1 /set_position dynamixel_sdk_examples/SetPosition "{id: 1, position: 1400}"
+rostopic pub -1 /set_position dynamixel_sdk_examples/SetPosition "{id: 1, position: 3400}"
 rosservice call /get_position "id: 1"
 ```
 
